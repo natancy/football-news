@@ -3,7 +3,7 @@ stages:
   - deploy
 
 test:
-  image: node:22-alpine
+  image: docker-registry.int.rclabenv.com:443/node:22-alpine
   stage: test
   script:
     - npm test
@@ -11,7 +11,7 @@ test:
     - if: $CI_COMMIT_BRANCH
 
 pages:
-  image: alpine:3.20
+  image: docker-registry.int.rclabenv.com:443/alpine:3.20
   stage: deploy
   needs:
     - job: test
