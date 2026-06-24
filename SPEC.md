@@ -36,7 +36,8 @@ Out of scope:
 6. The app must cache successful results for six hours.
 7. The app must avoid showing gambling odds or ticket pricing from the upstream payload.
 8. The app must predict the next matchday using local deterministic logic.
-9. Predictions must include predicted score, likely result, confidence and win/draw/loss probabilities.
+9. Predictions must include predicted score, likely result, expected goals, score confidence and win/draw/loss probabilities.
+10. Prediction UI must identify that predictions are reference output, not official forecasts or betting advice.
 
 ## Acceptance Criteria
 

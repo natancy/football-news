@@ -20,19 +20,19 @@
 - The challenge format helped define the expected deliverables early.
 - Keeping the app dependency-free made setup and review simple.
 - Separating data normalization from UI rendering made the logic testable.
-- Keeping predictions local avoided adding an API key or opaque external model.
+- Moving predictions to a local Elo-Poisson model kept the feature explainable without adding an API key or opaque external model.
 
 ## What Did Not Work Well
 
 - The challenge document is game-oriented, while the chosen idea is a notification utility. The project therefore documents the scope deviation clearly.
 - Public sports APIs can change without notice, so fallback data and source badges are necessary.
-- Sports predictions are inherently uncertain, so the UI needs restrained wording and clear confidence signals.
+- Sports predictions are inherently uncertain, so the UI needs restrained wording, expected-goal context and clear confidence signals.
 
 ## Surprises and Discoveries
 
 - ESPN's public scoreboard payload contains useful match metadata, but also betting and ticket fields that should not be surfaced for this product.
 - Querying only one API date is not enough for timezone-aware "today" filtering.
-- Deterministic prediction output is easier to test and explain than random-looking scores.
+- A deterministic Poisson score matrix is easier to test and explain than random-looking score generation.
 
 ## Estimated AI-Generated Code
 

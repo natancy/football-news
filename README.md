@@ -90,4 +90,6 @@ https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates
 
 ## Prediction Model
 
-预测模型是本地启发式模型，不调用付费或博彩服务。它结合球队基础强度、近期状态、主客场标记和可复现扰动，输出胜平负概率、置信度和预测比分。结果仅用于赛前参考。
+预测模型是本地 `Elo-Poisson v2` 模型，不调用付费或博彩服务。它结合球队基础 rating、近期状态、赛会主办国场地修正和 Poisson 比分分布，输出胜平负概率、预期进球、比分置信度和预测比分。
+
+这个模型没有做历史回测，也不会读取伤病、首发、赔率或实时 FIFA/Elo 排名，所以结果只适合作为赛前参考。

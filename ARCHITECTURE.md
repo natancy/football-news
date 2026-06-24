@@ -16,7 +16,7 @@ styles.css              Responsive visual design
 src/app.js              UI state, events, rendering and notifications
 src/date.js             Timezone-safe date formatting helpers
 src/schedule.js         ESPN fetch, normalization, filtering and message creation
-src/prediction.js       Local heuristic model for next-matchday score prediction
+src/prediction.js       Local Elo-Poisson model for next-matchday score prediction
 src/fallback.js         Offline fallback match data
 tests/schedule.test.js  Unit tests for core logic
 tests/prediction.test.js Unit tests for prediction logic
@@ -30,7 +30,7 @@ tests/prediction.test.js Unit tests for prediction logic
 4. Matches are filtered by the selected timezone's local date.
 5. `app.js` renders match cards and the notification message.
 6. `app.js` asks `schedule.js` for the next matchday after the selected date.
-7. `prediction.js` creates score and result predictions for that next matchday.
+7. `prediction.js` creates score and result predictions for that next matchday using static rating baselines, recent form adjustments, venue adjustments and a Poisson score matrix.
 8. Successful API results are cached in `localStorage` for six hours.
 9. If the API fails, fallback data is filtered with the same logic.
 
@@ -42,6 +42,8 @@ tests/prediction.test.js Unit tests for prediction logic
 - Browser notifications are user-triggered because reliable background push would require service workers and a server-side push subscription flow.
 - Predictions are deterministic and local so the same input produces stable UI and testable output.
 - Prediction labels are intentionally framed as reference output, not as official forecasts or betting advice.
+- The prediction model avoids random jitter. The most likely score is selected from an enumerated Poisson score matrix.
+- The rating table is static and intentionally transparent; it should be replaced or periodically regenerated if production accuracy becomes important.
 
 ## AI Tooling Used
 

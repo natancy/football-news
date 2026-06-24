@@ -94,7 +94,9 @@
               <p id="prediction-date-label" class="date-label"></p>
             </div>
           </div>
-          <p class="model-note">本地启发式模型预测，仅供赛前参考。</p>
+          <p class="model-note">
+            Elo-Poisson v2：基于球队强度、近期状态、中立场修正和 Poisson 比分分布，仅供赛前参考。
+          </p>
           <div id="prediction-list" class="prediction-list" aria-live="polite"></div>
         </section>
 
@@ -138,6 +140,7 @@
         <div>
           <p class="prediction-teams"></p>
           <p class="prediction-kickoff"></p>
+          <p class="prediction-model"></p>
         </div>
         <div class="prediction-result">
           <span class="prediction-score"></span>

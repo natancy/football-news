@@ -14,7 +14,11 @@ import {
   getFallbackNextMatchday,
   getFallbackMatchesForDate
 } from "./schedule.js";
-import { formatPredictionLine, predictMatches } from "./prediction.js";
+import {
+  PREDICTION_MODEL,
+  formatPredictionLine,
+  predictMatches
+} from "./prediction.js";
 
 const state = {
   dateKey: getDateKeyInTimezone(new Date(), DEFAULT_TIMEZONE),
@@ -261,9 +265,11 @@ function renderPredictions() {
       `${prediction.awayGoals} - ${prediction.homeGoals}`;
     card.querySelector(".prediction-winner").textContent = prediction.winner;
     card.querySelector(".prediction-confidence").textContent =
-      `置信度 ${prediction.confidence}%`;
+      `胜平负置信度 ${prediction.confidence}% · 比分置信度 ${prediction.exactScoreConfidence}%`;
     card.querySelector(".prediction-kickoff").textContent =
       `${formatKickoffTime(prediction.kickoff, state.timeZone)} · ${prediction.group || "FIFA World Cup"}`;
+    card.querySelector(".prediction-model").textContent =
+      `${PREDICTION_MODEL.label} · xG ${prediction.awayTeam.name} ${prediction.expectedGoals.away} / ${prediction.homeTeam.name} ${prediction.expectedGoals.home}`;
     card.querySelector(".prob-away").textContent =
       `${prediction.awayTeam.name} ${prediction.probabilities.awayWin}%`;
     card.querySelector(".prob-draw").textContent =
