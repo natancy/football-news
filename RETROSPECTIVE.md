@@ -20,7 +20,7 @@
 - The challenge format helped define the expected deliverables early.
 - Keeping the app dependency-free made setup and review simple.
 - Separating data normalization from UI rendering made the logic testable.
-- Moving predictions to a local Elo-Poisson model kept the feature explainable without adding an API key or opaque external model.
+- Moving predictions to a local Elo-Poisson model with standings context kept the feature explainable without adding an API key or opaque external model.
 
 ## What Did Not Work Well
 
@@ -33,6 +33,7 @@
 - ESPN's public scoreboard payload contains useful match metadata, but also betting and ticket fields that should not be surfaced for this product.
 - Querying only one API date is not enough for timezone-aware "today" filtering.
 - A deterministic Poisson score matrix is easier to test and explain than random-looking score generation.
+- Real standings data adds useful match context, but the model still needs conservative wording because tactical response to qualification pressure is not directly observable.
 
 ## Estimated AI-Generated Code
 

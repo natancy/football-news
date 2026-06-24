@@ -1,7 +1,9 @@
+import { describeQualification, getTeamStanding } from "./standings.js";
+
 export const PREDICTION_MODEL = {
   name: "Elo-Poisson",
-  version: "2.0.0",
-  label: "Elo-Poisson v2",
+  version: "2.1.0",
+  label: "Elo-Poisson v2.1",
   maxGoals: 6
 };
 
@@ -67,13 +69,17 @@ const HOST_COUNTRIES = new Map([
   ["Mexico", ["Mexico"]]
 ]);
 
-export function predictMatches(matches) {
-  return matches.map((match) => predictMatch(match));
+export function predictMatches(matches, standings = null) {
+  return matches.map((match) => predictMatch(match, standings));
 }
 
-export function predictMatch(match) {
-  const awayProfile = createTeamProfile(match.awayTeam);
-  const homeProfile = createTeamProfile(match.homeTeam);
+export function predictMatch(match, standings = null) {
+  const awayStanding = getTeamStanding(standings, match.awayTeam);
+  const homeStanding = getTeamStanding(standings, match.homeTeam);
+  const awaySituation = createSituationProfile(awayStanding);
+  const homeSituation = createSituationProfile(homeStanding);
+  const awayProfile = createTeamProfile(match.awayTeam, awayStanding, awaySituation);
+  const homeProfile = createTeamProfile(match.homeTeam, homeStanding, homeSituation);
   const venueAdjustments = getVenueAdjustments(match);
   const awayStrength = awayProfile.rating + venueAdjustments.away;
   const homeStrength = homeProfile.rating + venueAdjustments.home;
@@ -81,7 +87,9 @@ export function predictMatch(match) {
   const expectedGoals = calculateExpectedGoals({
     awayProfile,
     homeProfile,
-    ratingDiff
+    ratingDiff,
+    awaySituation,
+    homeSituation
   });
   const matrix = createScoreMatrix(
     expectedGoals.away,
@@ -89,8 +97,8 @@ export function predictMatch(match) {
     PREDICTION_MODEL.maxGoals
   );
   const probabilities = calculateOutcomeProbabilities(matrix);
-  const score = getMostLikelyScore(matrix);
   const outcome = getLikelyOutcome(probabilities);
+  const score = getMostLikelyScore(matrix, outcome);
   const winner =
     outcome === "draw"
       ? "平局"
@@ -121,6 +129,22 @@ export function predictMatch(match) {
       homeRating: Math.round(homeStrength),
       ratingDiff: Math.round(ratingDiff),
       neutralVenue: venueAdjustments.home === 0 && venueAdjustments.away === 0
+    },
+    qualification: {
+      away: {
+        status: awayStanding?.qualificationStatus || "unknown",
+        label: describeQualification(awayStanding),
+        points: awayStanding?.points ?? null,
+        rank: awayStanding?.rank ?? null,
+        source: awayStanding?.source || "unknown"
+      },
+      home: {
+        status: homeStanding?.qualificationStatus || "unknown",
+        label: describeQualification(homeStanding),
+        points: homeStanding?.points ?? null,
+        rank: homeStanding?.rank ?? null,
+        source: homeStanding?.source || "unknown"
+      }
     }
   };
 }
@@ -129,15 +153,23 @@ export function formatPredictionLine(prediction) {
   return `${prediction.awayTeam.name} ${prediction.awayGoals}-${prediction.homeGoals} ${prediction.homeTeam.name}，${prediction.winner}`;
 }
 
-function createTeamProfile(team) {
+function createTeamProfile(team, standing, situation) {
   const baseRating = TEAM_RATINGS[team.name] || DEFAULT_RATING;
   const adjustedRating =
-    baseRating + getFormAdjustment(team.form) + getRecordAdjustment(team.record);
+    baseRating +
+    getFormAdjustment(team.form) +
+    getRecordAdjustment(team.record) +
+    getStandingAdjustment(standing) +
+    situation.ratingAdjustment;
   const ratingDelta = adjustedRating - DEFAULT_RATING;
 
   return {
     rating: adjustedRating,
-    attackIndex: clamp(1 + ratingDelta / 1700, 0.72, 1.34),
+    attackIndex: clamp(
+      (1 + ratingDelta / 1700) * situation.attackMultiplier,
+      0.72,
+      1.4
+    ),
     defenseIndex: clamp(1 + ratingDelta / 1900, 0.76, 1.28)
   };
 }
@@ -170,6 +202,62 @@ function getRecordAdjustment(record = "") {
   return (wins * 3 + draws - losses * 2) * 3;
 }
 
+function getStandingAdjustment(standing) {
+  if (!standing) {
+    return 0;
+  }
+
+  const points = Number.isFinite(standing.points) ? standing.points : 0;
+  const goalDifference = Number.isFinite(standing.goalDifference)
+    ? standing.goalDifference
+    : 0;
+  const pointAdjustment = clamp((points - 3) * 4, -18, 18);
+  const goalDifferenceAdjustment = clamp(goalDifference * 2, -18, 18);
+  return pointAdjustment + goalDifferenceAdjustment;
+}
+
+function createSituationProfile(standing) {
+  const status = standing?.qualificationStatus || "unknown";
+
+  if (status === "direct") {
+    return {
+      ratingAdjustment: 8,
+      attackMultiplier: 0.98,
+      tempoAdjustment: -0.05
+    };
+  }
+
+  if (status === "wildcard") {
+    return {
+      ratingAdjustment: 2,
+      attackMultiplier: 1.05,
+      tempoAdjustment: 0.08
+    };
+  }
+
+  if (status === "eliminated") {
+    return {
+      ratingAdjustment: -26,
+      attackMultiplier: 0.96,
+      tempoAdjustment: -0.02
+    };
+  }
+
+  if (status === "chasing") {
+    return {
+      ratingAdjustment: -4,
+      attackMultiplier: 1.08,
+      tempoAdjustment: 0.1
+    };
+  }
+
+  return {
+    ratingAdjustment: 0,
+    attackMultiplier: 1,
+    tempoAdjustment: 0
+  };
+}
+
 function getVenueAdjustments(match) {
   const venueText = `${match.venue || ""} ${match.city || ""}`;
   return {
@@ -187,11 +275,23 @@ function getHostCountryBoost(teamName, venueText) {
   return countryNames.some((country) => venueText.includes(country)) ? 35 : 0;
 }
 
-function calculateExpectedGoals({ awayProfile, homeProfile, ratingDiff }) {
+function calculateExpectedGoals({
+  awayProfile,
+  homeProfile,
+  ratingDiff,
+  awaySituation,
+  homeSituation
+}) {
   const homeShare = sigmoid(ratingDiff / 390);
   const attackPressure =
     (awayProfile.attackIndex + homeProfile.attackIndex - 2) * 0.32;
-  const totalGoals = clamp(BASE_TOTAL_GOALS + attackPressure, 1.75, 3.35);
+  const situationTempo =
+    awaySituation.tempoAdjustment + homeSituation.tempoAdjustment;
+  const totalGoals = clamp(
+    BASE_TOTAL_GOALS + attackPressure + situationTempo,
+    1.65,
+    3.45
+  );
   const homeAttackEdge = homeProfile.attackIndex / awayProfile.defenseIndex;
   const awayAttackEdge = awayProfile.attackIndex / homeProfile.defenseIndex;
   const homeExpected = totalGoals * homeShare * clamp(homeAttackEdge, 0.78, 1.24);
@@ -256,8 +356,18 @@ function calculateOutcomeProbabilities(matrix) {
   return probabilities;
 }
 
-function getMostLikelyScore(matrix) {
-  return matrix.reduce((best, score) =>
+function getMostLikelyScore(matrix, outcome) {
+  const filtered = matrix.filter((score) => {
+    if (outcome === "home") {
+      return score.homeGoals > score.awayGoals;
+    }
+    if (outcome === "away") {
+      return score.awayGoals > score.homeGoals;
+    }
+    return score.homeGoals === score.awayGoals;
+  });
+
+  return filtered.reduce((best, score) =>
     score.probability > best.probability ? score : best
   );
 }

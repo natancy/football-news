@@ -12,7 +12,7 @@
 - 展示开球时间、分组、场地、转播信息和队徽。
 - 支持复制通知文案和浏览器桌面通知。
 - ESPN API 不可用时使用内置回退赛程，避免页面空白。
-- 自动寻找下一个比赛日，并用本地预测模型给出胜平负倾向和比分预测。
+- 自动寻找下一个比赛日，并结合小组积分形势给出胜平负倾向和比分预测。
 
 ## Setup
 
@@ -75,8 +75,8 @@ https://natancy.github.io/football-news/
 npm test
 ```
 
-测试覆盖日期换算、ESPN 数据标准化、按时区筛选和通知文案生成。
-同时覆盖下一个比赛日查找和预测模型输出。
+测试覆盖日期换算、ESPN 数据标准化、standings 标准化、按时区筛选和通知文案生成。
+同时覆盖下一个比赛日查找、出线形势推导和预测模型输出。
 
 ## Data Source
 
@@ -88,8 +88,14 @@ https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates
 
 页面会请求目标日期前后各一天的数据，再用浏览器端时区过滤目标自然日，避免跨时区开球导致比赛漏掉。
 
+小组积分和出线形势来自 ESPN public standings API：
+
+```text
+https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings?season=2026
+```
+
 ## Prediction Model
 
-预测模型是本地 `Elo-Poisson v2` 模型，不调用付费或博彩服务。它结合球队基础 rating、近期状态、赛会主办国场地修正和 Poisson 比分分布，输出胜平负概率、预期进球、比分置信度和预测比分。
+预测模型是本地 `Elo-Poisson v2.1` 模型，不调用付费或博彩服务。它结合球队基础 rating、近期状态、小组积分/出线形势、赛会主办国场地修正和 Poisson 比分分布，输出胜平负概率、预期进球、比分置信度和预测比分。
 
-这个模型没有做历史回测，也不会读取伤病、首发、赔率或实时 FIFA/Elo 排名，所以结果只适合作为赛前参考。
+这个模型没有做历史回测，也不会读取伤病、首发、赔率或实时 FIFA/Elo 排名。小组形势来自 ESPN 当前积分榜；如果接口不可用，页面会从球队 record 做保守推导。结果只适合作为赛前参考。

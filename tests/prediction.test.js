@@ -25,8 +25,29 @@ const match = {
 };
 
 const prediction = predictMatch(match);
+const standings = {
+  teams: {
+    Uzbekistan: {
+      teamName: "Uzbekistan",
+      points: 1,
+      goalDifference: -4,
+      rank: 3,
+      qualificationStatus: "wildcard",
+      source: "standings"
+    },
+    Portugal: {
+      teamName: "Portugal",
+      points: 6,
+      goalDifference: 5,
+      rank: 1,
+      qualificationStatus: "direct",
+      source: "standings"
+    }
+  }
+};
+const predictionWithStandings = predictMatch(match, standings);
 
-assert.equal(PREDICTION_MODEL.label, "Elo-Poisson v2");
+assert.equal(PREDICTION_MODEL.label, "Elo-Poisson v2.1");
 assert.equal(prediction.matchId, match.id);
 assert.equal(prediction.model, PREDICTION_MODEL.label);
 assert.equal(prediction.homeTeam.name, "Portugal");
@@ -44,7 +65,14 @@ assert.equal(
   100
 );
 assert.equal(prediction.outcome, "home");
+assert.equal(prediction.homeGoals > prediction.awayGoals, true);
 assert.ok(prediction.probabilities.homeWin > prediction.probabilities.awayWin);
 assert.ok(prediction.expectedGoals.home > prediction.expectedGoals.away);
 assert.match(formatPredictionLine(prediction), /Uzbekistan/);
-assert.equal(predictMatches([match]).length, 1);
+assert.equal(predictionWithStandings.qualification.home.status, "direct");
+assert.equal(predictionWithStandings.qualification.away.status, "wildcard");
+assert.equal(
+  predictionWithStandings.qualification.home.label,
+  "当前直接出线区"
+);
+assert.equal(predictMatches([match], standings).length, 1);

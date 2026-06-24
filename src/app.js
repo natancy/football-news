@@ -19,6 +19,10 @@ import {
   formatPredictionLine,
   predictMatches
 } from "./prediction.js";
+import {
+  fetchStandings,
+  inferStandingsForMatches
+} from "./standings.js";
 
 const state = {
   dateKey: getDateKeyInTimezone(new Date(), DEFAULT_TIMEZONE),
@@ -137,6 +141,11 @@ async function loadPredictions({ force = false, preferFallback = false } = {}) {
       (preferFallback
         ? getFallbackNextMatchday(state.dateKey, state.timeZone)
         : await fetchNextMatchday(state.dateKey, state.timeZone));
+    const standings = await loadStandings({
+      force,
+      preferFallback,
+      matches: nextMatchday.matches
+    });
 
     if (!cached && !preferFallback) {
       writeCachedPrediction(state.dateKey, state.timeZone, nextMatchday);
@@ -144,20 +153,41 @@ async function loadPredictions({ force = false, preferFallback = false } = {}) {
 
     state.nextMatchday = {
       ...nextMatchday,
-      predictions: predictMatches(nextMatchday.matches),
+      predictions: predictMatches(nextMatchday.matches, standings),
       source: cached ? "cache" : preferFallback ? "fallback" : "live"
     };
   } catch (error) {
     console.warn(error);
     const nextMatchday = getFallbackNextMatchday(state.dateKey, state.timeZone);
+    const standings = inferStandingsForMatches(nextMatchday.matches);
     state.nextMatchday = {
       ...nextMatchday,
-      predictions: predictMatches(nextMatchday.matches),
+      predictions: predictMatches(nextMatchday.matches, standings),
       source: nextMatchday.matches.length ? "fallback" : "error"
     };
   }
 
   renderPredictions();
+}
+
+async function loadStandings({ force = false, preferFallback = false, matches = [] }) {
+  if (preferFallback) {
+    return inferStandingsForMatches(matches);
+  }
+
+  try {
+    const cached = force ? null : readCachedStandings();
+    if (cached) {
+      return cached;
+    }
+
+    const standings = await fetchStandings();
+    writeCachedStandings(standings);
+    return standings;
+  } catch (error) {
+    console.warn(error);
+    return inferStandingsForMatches(matches);
+  }
 }
 
 function render() {
@@ -270,6 +300,8 @@ function renderPredictions() {
       `${formatKickoffTime(prediction.kickoff, state.timeZone)} · ${prediction.group || "FIFA World Cup"}`;
     card.querySelector(".prediction-model").textContent =
       `${PREDICTION_MODEL.label} · xG ${prediction.awayTeam.name} ${prediction.expectedGoals.away} / ${prediction.homeTeam.name} ${prediction.expectedGoals.home}`;
+    card.querySelector(".prediction-situation").textContent =
+      `形势：${prediction.awayTeam.name} ${prediction.qualification.away.label} / ${prediction.homeTeam.name} ${prediction.qualification.home.label}`;
     card.querySelector(".prob-away").textContent =
       `${prediction.awayTeam.name} ${prediction.probabilities.awayWin}%`;
     card.querySelector(".prob-draw").textContent =
@@ -411,6 +443,35 @@ function writeCachedPrediction(dateKey, timeZone, nextMatchday) {
     JSON.stringify({
       createdAt: Date.now(),
       nextMatchday
+    })
+  );
+}
+
+function standingsCacheKey() {
+  return "world-cup-standings:2026";
+}
+
+function readCachedStandings() {
+  const raw = localStorage.getItem(standingsCacheKey());
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(raw);
+    const isFresh = Date.now() - cached.createdAt < 6 * 60 * 60 * 1000;
+    return isFresh ? cached.standings : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedStandings(standings) {
+  localStorage.setItem(
+    standingsCacheKey(),
+    JSON.stringify({
+      createdAt: Date.now(),
+      standings
     })
   );
 }

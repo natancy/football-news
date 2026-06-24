@@ -24,7 +24,7 @@ Out of scope:
 - Push notifications when the browser tab is closed.
 - Betting odds, ticket purchase flows or paid content.
 - Official predictions or gambling advice.
-- Historical analytics and standings.
+- Historical analytics beyond the current table.
 
 ## Functional Requirements
 
@@ -37,7 +37,8 @@ Out of scope:
 7. The app must avoid showing gambling odds or ticket pricing from the upstream payload.
 8. The app must predict the next matchday using local deterministic logic.
 9. Predictions must include predicted score, likely result, expected goals, score confidence and win/draw/loss probabilities.
-10. Prediction UI must identify that predictions are reference output, not official forecasts or betting advice.
+10. Predictions must include qualification context when standings data is available.
+11. Prediction UI must identify that predictions are reference output, not official forecasts or betting advice.
 
 ## Acceptance Criteria
 
@@ -48,4 +49,5 @@ Out of scope:
 - The browser notification button requests permission and sends the generated message when allowed.
 - The prediction section shows the next matchday after the selected date when one is found.
 - Prediction output is stable for the same match input.
+- Prediction cards show each team's qualification situation.
 - `npm test` passes.
