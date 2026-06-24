@@ -54,6 +54,21 @@ https://sandy-wu-news-notification.pages.git.ringcentral.com
 
 实际 URL 以 GitLab 项目 `Deploy > Pages` 页面显示为准。
 
+## Deploy to GitHub Pages
+
+这个项目也可以直接用 GitHub Pages 的 branch source 发布：
+
+1. 打开 GitHub 仓库 `Settings > Pages`。
+2. `Source` 选择 `Deploy from a branch`。
+3. `Branch` 选择 `main`，目录选择 `/root`。
+4. 保存后等待 Pages build 完成。
+
+发布地址通常是：
+
+```text
+https://natancy.github.io/football-news/
+```
+
 ## Test
 
 ```bash
