@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>世界杯比赛日通知</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-labelledby="page-title">
+        <header class="topbar">
+          <div class="brand-mark">
+            <img
+              src="https://a.espncdn.com/i/leaguelogos/soccer/500/4.png"
+              alt="FIFA World Cup"
+            />
+          </div>
+          <div>
+            <p class="eyebrow">Daily Matchday Digest</p>
+            <h1 id="page-title">世界杯比赛日通知</h1>
+          </div>
+        </header>
+
+        <section class="control-strip" aria-label="赛程控制">
+          <label>
+            <span>日期</span>
+            <input id="date-input" type="date" />
+          </label>
+          <label>
+            <span>时区</span>
+            <select id="timezone-select">
+              <option value="Asia/Shanghai">中国时间</option>
+              <option value="America/New_York">美东时间</option>
+              <option value="America/Los_Angeles">美西时间</option>
+              <option value="America/Mexico_City">墨西哥城</option>
+              <option value="America/Toronto">多伦多</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </label>
+          <button id="today-button" class="ghost-button" type="button">今天</button>
+          <button id="refresh-button" class="primary-button" type="button">刷新赛程</button>
+        </section>
+
+        <section class="summary-layout">
+          <article class="notification-panel" aria-labelledby="notification-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">通知文案</p>
+                <h2 id="notification-title">今日提醒</h2>
+              </div>
+              <span id="data-source-badge" class="source-badge">准备获取</span>
+            </div>
+            <p id="notification-message" class="notification-copy">
+              正在获取世界杯比赛日信息...
+            </p>
+            <div class="action-row">
+              <button id="copy-button" class="secondary-button" type="button">复制文案</button>
+              <button id="notify-button" class="secondary-button" type="button">发送浏览器通知</button>
+            </div>
+            <dl class="stats-grid" aria-label="比赛日概览">
+              <div>
+                <dt>比赛</dt>
+                <dd id="match-count">--</dd>
+              </div>
+              <div>
+                <dt>最早开球</dt>
+                <dd id="first-kickoff">--</dd>
+              </div>
+              <div>
+                <dt>更新时间</dt>
+                <dd id="updated-at">--</dd>
+              </div>
+            </dl>
+          </article>
+
+          <aside class="status-panel" aria-labelledby="status-title">
+            <p class="eyebrow">自动获取</p>
+            <h2 id="status-title">每日检查已开启</h2>
+            <p>
+              页面会在打开时获取当天赛程，并在日期跨天后自动刷新。接口不可用时，会展示内置回退赛程，保证通知页仍可使用。
+            </p>
+          </aside>
+        </section>
+
+        <section class="prediction-section" aria-labelledby="prediction-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Prediction Model</p>
+              <h2 id="prediction-title">下个比赛日预测</h2>
+            </div>
+            <div class="heading-status">
+              <span id="prediction-source-badge" class="source-badge">准备预测</span>
+              <p id="prediction-date-label" class="date-label"></p>
+            </div>
+          </div>
+          <p class="model-note">本地启发式模型预测，仅供赛前参考。</p>
+          <div id="prediction-list" class="prediction-list" aria-live="polite"></div>
+        </section>
+
+        <section class="match-section" aria-labelledby="matches-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Fixtures</p>
+              <h2 id="matches-title">比赛列表</h2>
+            </div>
+            <p id="date-label" class="date-label"></p>
+          </div>
+          <div id="match-list" class="match-list" aria-live="polite"></div>
+        </section>
+      </section>
+    </main>
+
+    <template id="match-card-template">
+      <article class="match-card">
+        <div class="team team-away">
+          <img class="team-logo away-logo" alt="" />
+          <span class="team-name away-name"></span>
+        </div>
+        <div class="match-center">
+          <time class="kickoff-time"></time>
+          <span class="match-state"></span>
+          <span class="group-label"></span>
+        </div>
+        <div class="team team-home">
+          <img class="team-logo home-logo" alt="" />
+          <span class="team-name home-name"></span>
+        </div>
+        <div class="match-meta">
+          <span class="venue-label"></span>
+          <span class="broadcast-label"></span>
+        </div>
+      </article>
+    </template>
+
+    <template id="prediction-card-template">
+      <article class="prediction-card">
+        <div>
+          <p class="prediction-teams"></p>
+          <p class="prediction-kickoff"></p>
+        </div>
+        <div class="prediction-result">
+          <span class="prediction-score"></span>
+          <span class="prediction-winner"></span>
+        </div>
+        <div class="probability-row" aria-label="胜平负概率">
+          <span class="prob-away"></span>
+          <span class="prob-draw"></span>
+          <span class="prob-home"></span>
+        </div>
+        <p class="prediction-confidence"></p>
+      </article>
+    </template>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
