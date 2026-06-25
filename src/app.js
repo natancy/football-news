@@ -237,11 +237,7 @@ function renderMatches() {
 
   for (const match of state.matches) {
     const card = elements.template.content.firstElementChild.cloneNode(true);
-    card.querySelector(".away-logo").src = match.awayTeam.logo;
-    card.querySelector(".away-logo").alt = `${match.awayTeam.name} logo`;
     card.querySelector(".away-name").textContent = match.awayTeam.name;
-    card.querySelector(".home-logo").src = match.homeTeam.logo;
-    card.querySelector(".home-logo").alt = `${match.homeTeam.name} logo`;
     card.querySelector(".home-name").textContent = match.homeTeam.name;
 
     const kickoff = card.querySelector(".kickoff-time");
@@ -252,9 +248,6 @@ function renderMatches() {
     card.querySelector(".venue-label").textContent = [match.venue, match.city]
       .filter(Boolean)
       .join(" · ");
-    card.querySelector(".broadcast-label").textContent = match.broadcasts?.length
-      ? `转播：${match.broadcasts.join(" / ")}`
-      : "转播信息待更新";
     elements.matchList.append(card);
   }
 }

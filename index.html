@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>世界杯比赛日通知</title>
+    <title>世界杯赛前预测</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -17,8 +17,8 @@
             />
           </div>
           <div>
-            <p class="eyebrow">Daily Matchday Digest</p>
-            <h1 id="page-title">世界杯比赛日通知</h1>
+            <p class="eyebrow">World Cup Forecast Board</p>
+            <h1 id="page-title">世界杯赛前预测</h1>
           </div>
         </header>
 
@@ -42,12 +42,29 @@
           <button id="refresh-button" class="primary-button" type="button">刷新赛程</button>
         </section>
 
+        <section class="prediction-section" aria-labelledby="prediction-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Prediction Model</p>
+              <h2 id="prediction-title">下个比赛日预测</h2>
+            </div>
+            <div class="heading-status">
+              <span id="prediction-source-badge" class="source-badge">准备预测</span>
+              <p id="prediction-date-label" class="date-label"></p>
+            </div>
+          </div>
+          <p class="model-note">
+            Elo-Poisson v2.1 结合球队强度、近期状态、小组形势与 Poisson 比分分布。
+          </p>
+          <div id="prediction-list" class="prediction-list" aria-live="polite"></div>
+        </section>
+
         <section class="summary-layout">
           <article class="notification-panel" aria-labelledby="notification-title">
             <div class="panel-heading">
               <div>
-                <p class="eyebrow">通知文案</p>
-                <h2 id="notification-title">今日提醒</h2>
+                <p class="eyebrow">Matchday Brief</p>
+                <h2 id="notification-title">比赛日摘要</h2>
               </div>
               <span id="data-source-badge" class="source-badge">准备获取</span>
             </div>
@@ -75,36 +92,19 @@
           </article>
 
           <aside class="status-panel" aria-labelledby="status-title">
-            <p class="eyebrow">自动获取</p>
-            <h2 id="status-title">每日检查已开启</h2>
+            <p class="eyebrow">Data</p>
+            <h2 id="status-title">自动刷新</h2>
             <p>
-              页面会在打开时获取当天赛程，并在日期跨天后自动刷新。接口不可用时，会展示内置回退赛程，保证通知页仍可使用。
+              打开页面时获取当天赛程、下个比赛日和小组形势。接口不可用时使用回退数据。
             </p>
           </aside>
-        </section>
-
-        <section class="prediction-section" aria-labelledby="prediction-title">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Prediction Model</p>
-              <h2 id="prediction-title">下个比赛日预测</h2>
-            </div>
-            <div class="heading-status">
-              <span id="prediction-source-badge" class="source-badge">准备预测</span>
-              <p id="prediction-date-label" class="date-label"></p>
-            </div>
-          </div>
-          <p class="model-note">
-            Elo-Poisson v2.1：基于球队强度、近期状态、小组形势、场地修正和 Poisson 比分分布，仅供赛前参考。
-          </p>
-          <div id="prediction-list" class="prediction-list" aria-live="polite"></div>
         </section>
 
         <section class="match-section" aria-labelledby="matches-title">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Fixtures</p>
-              <h2 id="matches-title">比赛列表</h2>
+              <p class="eyebrow">Results</p>
+              <h2 id="matches-title">赛程结果</h2>
             </div>
             <p id="date-label" class="date-label"></p>
           </div>
@@ -115,22 +115,16 @@
 
     <template id="match-card-template">
       <article class="match-card">
-        <div class="team team-away">
-          <img class="team-logo away-logo" alt="" />
+        <time class="kickoff-time"></time>
+        <div class="match-teams">
           <span class="team-name away-name"></span>
-        </div>
-        <div class="match-center">
-          <time class="kickoff-time"></time>
-          <span class="match-state"></span>
-          <span class="group-label"></span>
-        </div>
-        <div class="team team-home">
-          <img class="team-logo home-logo" alt="" />
+          <span class="vs-label">vs</span>
           <span class="team-name home-name"></span>
         </div>
+        <span class="match-state"></span>
+        <span class="group-label"></span>
         <div class="match-meta">
           <span class="venue-label"></span>
-          <span class="broadcast-label"></span>
         </div>
       </article>
     </template>
