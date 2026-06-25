@@ -1,15 +1,28 @@
-# World Cup Matchday Notifier
+# World Cup Forecast Board
 
-一个纯前端世界杯比赛日通知页。页面每天获取 FIFA World Cup 赛程，按所选时区筛选当天比赛，并生成可以复制或通过浏览器通知发送的中文提醒消息。
+一个纯前端世界杯赛前预测与比赛日通知页。页面每天获取 FIFA World Cup 赛程，按所选时区筛选比赛日，并用本地 Elo-Poisson 模型生成下个比赛日的胜平负概率和预测比分。
 
 本项目根据 `AI-Native Engineering Challenge.md` 创建。原挑战建议制作小游戏；本仓库选择了一个更贴近日常使用场景的小工具，并保留完整的规格、架构、测试与复盘文档。
+
+## Live Demo
+
+Playable demo: https://natancy.github.io/football-news/
+
+## Challenge Monitor Checklist
+
+- Source code: `index.html`, `styles.css`, `src/*.js`.
+- Required docs: `README.md`, `SPEC.md`, `ARCHITECTURE.md`, `RETROSPECTIVE.md`.
+- Hosted playable/demo link: https://natancy.github.io/football-news/
+- Local run command: `npm run start`.
+- Test command: `npm test`.
 
 ## Features
 
 - 每次打开页面都会获取当天世界杯赛程。
 - 支持日期和时区选择，默认使用中国时间。
-- 生成一条可直接发送的通知文案。
-- 展示开球时间、分组、场地、转播信息和队徽。
+- 预测区优先展示下个比赛日的胜平负概率、比分、预期进球和出线形势。
+- 生成一条可直接发送的比赛日摘要通知文案。
+- 赛程结果区保留开球时间、双方、比分/状态、小组和场地信息。
 - 支持复制通知文案和浏览器桌面通知。
 - ESPN API 不可用时使用内置回退赛程，避免页面空白。
 - 自动寻找下一个比赛日，并结合小组积分形势给出胜平负倾向和比分预测。
@@ -46,13 +59,7 @@ http://localhost:5173
 https://git.ringcentral.com/rc-ai-learning/sandy-wu-news-notification.git
 ```
 
-发布成功后，页面地址通常会类似：
-
-```text
-https://sandy-wu-news-notification.pages.git.ringcentral.com
-```
-
-实际 URL 以 GitLab 项目 `Deploy > Pages` 页面显示为准。
+实际 URL 以 GitLab 项目 `Deploy > Pages` 页面显示为准。如果 GitLab Pages 开启了访问控制，自动 monitor 可能无法把它识别为公开 playable demo；README 顶部的 GitHub Pages 链接用于公开 demo 检查。
 
 ## Deploy to GitHub Pages
 
